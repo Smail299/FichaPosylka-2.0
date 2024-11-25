@@ -1,0 +1,184 @@
+package com.example.fichaposylka;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
+import java.util.Random;
+
+public class FichaPosylkaPlugin extends JavaPlugin implements Listener {
+
+    private final Random random = new Random();
+    private final HashMap<Location, Posylka> posylkas = new HashMap<>();
+
+    @Override
+    public void onEnable() {
+        getLogger().info("FichaPosylkaPlugin enabled!");
+        getServer().getPluginManager().registerEvents(this, this);
+        startSpawnTask();
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("FichaPosylkaPlugin disabled!");
+    }
+
+    private void startSpawnTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                spawnPosylka();
+            }
+        }.runTaskTimer(this, 0, 3600 * 20);
+    }
+
+    private void spawnPosylka() {
+        int x = random.nextInt(4000) - 2000;
+        int z = random.nextInt(4000) - 2000;
+        int y = getHighestBlockYAt(x, z);
+
+        Location location = new Location(Bukkit.getWorld("world"), x, y, z);
+        String rarity = getRarity();
+        String schematicName = rarity + "p.schem";
+
+        // Здесь добавить код для спавна схематики
+        // Также создать объект Posylka и добавить его в HashMap
+        Posylka posylka = new Posylka(location, rarity);
+        posylkas.put(location, posylka);
+
+        Bukkit.broadcastMessage("Посылка заспавнилась на координатах: " + x + " " + y + " " + z);
+    }
+
+    private String getRarity() {
+        int chance = random.nextInt(100);
+        if (chance < 5) {
+            return "legendary";
+        } else if (chance < 20) {
+            return "epic";
+        } else {
+            return "rare";
+        }
+    }
+
+    private int getHighestBlockYAt(int x, int z) {
+        for (int y = 255; y > 0; y--) {
+            Material material = Bukkit.getWorld("world").getBlockAt(x, y, z).getType();
+            if (material != Material.AIR) {
+                return y + 1;
+            }
+        }
+        return 64;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("posylka")) {
+            if (args.length == 0) {
+                sender.sendMessage("Использование: /posylka <spawn|additem|reload>");
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("spawn")) {
+                spawnPosylka();
+                sender.sendMessage("Посылка заспавнена!");
+                return true;
+            } else if (args[0].equalsIgnoreCase("additem")) {
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    if (args.length < 3) {
+                        player.sendMessage("Использование: /posylka additem <редкость> <шанс>");
+                        return true;
+                    }
+                    String rarity = args[1].toLowerCase();
+                    int chance;
+                    try {
+                        chance = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        player.sendMessage("Шанс должен быть числом.");
+                        return true;
+                    }
+                    ItemStack item = player.getInventory().getItemInMainHand();
+                    if (item.getType() == Material.AIR) {
+                        player.sendMessage("Вы должны держать предмет в руке.");
+                        return true;
+                    }
+                    addItemToConfig(rarity, item, chance);
+                    player.sendMessage("Предмет добавлен в конфигурацию.");
+                    return true;
+                } else {
+                    sender.sendMessage("Эту команду можно использовать только игрокам.");
+                    return true;
+                }
+            } else if (args[0].equalsIgnoreCase("reload")) {
+                reloadConfig();
+                sender.sendMessage("Конфигурация перезагружена.");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addItemToConfig(String rarity, ItemStack item, int chance) {
+        // Здесь добавить код для добавления предмета в конфигурацию
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Location location = event.getClickedBlock().getLocation();
+        if (posylkas.containsKey(location)) {
+            Posylka posylka = posylkas.get(location);
+            if (posylka.isBreakable()) {
+                posylka.reduceDurability();
+                // Здесь добавить код для награды и удаления посылки при прочности 0
+            } else {
+                event.getPlayer().sendMessage("Посылка откроется через " + posylka.getRemainingTime() + " секунд.");
+            }
+        }
+    }
+
+    private class Posylka {
+        private final Location location;
+        private final String rarity;
+        private int durability;
+        private final long spawnTime;
+
+        public Posylka(Location location, String rarity) {
+            this.location = location;
+            this.rarity = rarity;
+            this.spawnTime = System.currentTimeMillis();
+            switch (rarity) {
+                case "epic":
+                    this.durability = 3500;
+                    break;
+                case "legendary":
+                    this.durability = 500;
+                    break;
+                default:
+                    this.durability = 2500;
+            }
+        }
+
+        public boolean isBreakable() {
+            return System.currentTimeMillis() - spawnTime >= 300000; // 5 минут
+        }
+
+        public void reduceDurability() {
+            durability--;
+            // Здесь добавить код для проверки наград и прочности
+        }
+
+        public long getRemainingTime() {
+            long remainingTime = 300000 - (System.currentTimeMillis() - spawnTime);
+            return Math.max(remainingTime / 1000, 0);
+        }
+    }
+}
