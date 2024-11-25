@@ -1,0 +1,39 @@
+diapason: 
+  x: 2000 
+  z: 2000
+world: world
+open-timer: 300
+spawn-timer: 3600
+spawn-message: 
+  - 'Посылка заспавнилась'
+  - 'Ее координаты: {x} {y} {z}'
+name-spawn-rare: 
+  - 'Обычная посылка'
+  - 'Откроется через %time%'
+name-spawn-epic: 
+  - 'Эпическая посылка'
+  - 'Откроется через %time%'
+name-spawn-legendary:
+  - 'Легендарная посылка'
+  - 'Откроется через %time%'
+break-rare: 2500
+break-epic: 3500
+break-legendary: 500
+name-rare:
+  - 'Обычная посылка'
+  - 'Нужно сломать еще %strength%'
+name-epic:  
+  - 'Эпическая посылка'
+  - 'Нужно сломать еще %strength%'
+name-legendary: 
+  - 'Легендарная посылка'
+  - 'Нужно сломать еще %strength%'
+name-remove-rare:
+  - 'Сундук сломан! Скорее подбирай ресурсы'
+  - 'Исчезнет через %time-remove%'
+name-remove-epic:  
+  - 'Шалкер сломан! Скорее подбирай ресурсы'
+  - 'Исчезнет через %time-remove%'
+name-remove-legendary:
+  - 'Якорь Возрождения сломан! Скорее подбирай ресурсы'
+  - 'Исчезнет через %time-remove%'
