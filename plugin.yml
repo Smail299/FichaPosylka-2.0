@@ -1,0 +1,14 @@
+name: FichaPosylka
+version: 1.0
+main: com.example.fichaposylka.FichaPosylkaPlugin
+api-version: 1.16
+commands:
+  posylka:
+    description: Команды для плагина FichaPosylka
+    usage: /posylka <spawn|additem|reload>
+    permission: fichaposylka.command
+    permission-message: У вас нет прав на выполнение этой команды.
+permissions:
+  fichaposylka.command:
+    description: Дает доступ к командам плагина FichaPosylka.
+    default: op
