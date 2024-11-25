@@ -1,0 +1,10 @@
+give-item:
+  rare:
+    - '[console] xp give %player_name% 5343'
+      chance: 10
+  epic:
+    - '[console] xp give %player_name% 5342'
+      chance: 10
+  legendary:
+    - '[console] xp give %player_name% 5341'
+      chance: 10
